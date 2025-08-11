@@ -32,7 +32,11 @@ class SimpleTokenizer {
   }
 
   tokenize(text) {
-    return text.toLowerCase().split(' ').filter(word => word.length > 0);
+    return text
+      .toLowerCase()
+      .split(/\s+/)
+      .map(t => t.replace(/[^\w]/g, ''))
+      .filter(word => word.length > 0);
   }
 
   encode(text) {

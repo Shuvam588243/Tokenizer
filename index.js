@@ -8,10 +8,14 @@ const sentences = JSON.parse(rawData);
 
 tokenizer.train(sentences);
 
-const text = "Do you know me?";
+// examples
+// microservices architecture is amazing
+
+
+const text = "is Microservice a better choice then monolithic?";
 const encoded = tokenizer.encode(text);
 console.log("Encoded:", encoded);
 
-const tokensToDecode = [120, 7, 230, 1];
+const tokensToDecode = encoded;
 const decoded = tokenizer.decode(tokensToDecode);
 console.log("Decoded:", decoded);
