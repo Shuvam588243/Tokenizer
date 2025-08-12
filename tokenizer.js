@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 class SimpleTokenizer {
   constructor() {
     this.vocab = {};
@@ -42,12 +45,34 @@ class SimpleTokenizer {
   encode(text) {
     let tokens = this.tokenize(text);
     let ids = [];
+    let newWordFound = false;
+
+
     for (let token of tokens) {
       if (this.vocab[token] !== undefined) {
         ids.push(this.vocab[token]);
       } else {
-        ids.push(this.specialTokens["[UNK]"]);
+        console.log(`Detected new word - [${token}]`);
+        newWordFound=true;
+        this.vocab[token] = this.nextId;
+        this.invVocab[this.nextId] = token;
+        this.nextId++;
+        ids.push(this.vocab[token])
       }
+    }
+
+    if(newWordFound){
+      const filePath = path.join(__dirname, 'conversation.json');
+        let existing = [];
+        if (fs.existsSync(filePath)) {
+            try {
+                existing = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+            } catch {
+                existing = [];
+            }
+        }
+        existing.push(text);
+        fs.writeFileSync(filePath, JSON.stringify(existing, null, 2), 'utf8');
     }
     return ids;
   }
