@@ -18,6 +18,7 @@ if (fs.existsSync(vocabPath)) {
     conversationPath: path.join(__dirname, 'conversation.json'),
     sentencesPath: path.join(__dirname, 'sentences.json'),
   });
+  console.log('Vocabulary initialized.');
 }
 
 let conversations = [];

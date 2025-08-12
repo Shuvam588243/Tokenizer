@@ -132,12 +132,10 @@ class SimpleTokenizer {
     }
   }
 
-  tokenize(text) {
+tokenize(text) {
     return text
       .toLowerCase()
-      .split(/\s+/)
-      .map((t) => t.replace(/[^\w]/g, ''))
-      .filter((word) => word.length > 0);
+      .match(/\b[\w'-]+\b/g) || [];
   }
 
   encode(text) {
