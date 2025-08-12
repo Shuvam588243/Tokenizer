@@ -1,11 +1,12 @@
+const path = require('path');
 const fs = require('fs');
 const SimpleTokenizer = require('../tokenizer');
-const tokenizer = new SimpleTokenizer();
 
-
-const rawData = fs.readFileSync('sentences.json', 'utf8');
+const filePath = path.join(__dirname, '..', 'sentences.json');
+const rawData = fs.readFileSync(filePath, 'utf8');
 const sentences = JSON.parse(rawData);
 
+const tokenizer = new SimpleTokenizer();
 tokenizer.train(sentences);
 
 const text = "Do you know me?";
