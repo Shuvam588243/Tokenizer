@@ -5,7 +5,7 @@ class SimpleTokenizer {
   constructor(minFrequency = 1) {
     this.vocab = {};
     this.invVocab = {};
-    this.tokenFreq = {};
+    this.tokenFreq = new Map();
     this.specialTokens = {
       "[PAD]": 0,
       "[UNK]": 1,
@@ -63,6 +63,7 @@ class SimpleTokenizer {
       this.vocab = data.vocab;
       this.invVocab = data.invVocab;
       this.nextId = data.nextId;
+      this.tokenFreq = new Map(Object.entries(data.tokenFreq || {}));
     }
   }
 
@@ -125,20 +126,48 @@ class SimpleTokenizer {
     return this.vocab[token] !== undefined ? this.vocab[token] : this.vocab["[UNK]"];
   }
 
-  train(texts) {
-    for (let text of texts) {
-      let tokens = this.tokenize(text);
-      for (let token of tokens) {
-        this.tokenFreq[token] = (this.tokenFreq[token] || 0) + 1;
+train(texts, options = {}) {
+  const {
+    minFrequency = this.minFrequency,
+    onTokenAdded = null,
+  } = options;
 
-        if (!(token in this.vocab) && this.tokenFreq[token] >= this.minFrequency) {
-          this.vocab[token] = this.nextId;
-          this.invVocab[this.nextId] = token;
-          this.nextId++;
-        }
-      }
+  if (!this.tokenFreq) this.tokenFreq = new Map();
+
+  let totalTokensProcessed = 0;
+  let newTokensAdded = 0;
+
+  for (const text of texts) {
+    const tokens = this.tokenize(text);
+    for (const token of tokens) {
+      totalTokensProcessed++;
+      const freq = this.tokenFreq.get(token) || 0;
+      this.tokenFreq.set(token, freq + 1);
     }
   }
+
+  for (const [token, freq] of this.tokenFreq.entries()) {
+    if (freq >= minFrequency && !(token in this.vocab)) {
+      this.vocab[token] = this.nextId;
+      this.invVocab[this.nextId] = token;
+      if (typeof onTokenAdded === 'function') {
+        onTokenAdded(token, this.nextId);
+      }
+      this.nextId++;
+      newTokensAdded++;
+    }
+  }
+
+  console.log(`Training complete: processed ${totalTokensProcessed} tokens; added ${newTokensAdded} new tokens; unique tokens so far: ${this.tokenFreq.size}`);
+
+  return {
+    totalTokensProcessed,
+    newTokensAdded,
+    uniqueTokens: this.tokenFreq.size,
+  };
+}
+
+
 
 tokenize(text) {
     return text
