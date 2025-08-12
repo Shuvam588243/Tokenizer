@@ -2,9 +2,10 @@ const fs = require('fs');
 const path = require('path');
 
 class SimpleTokenizer {
-  constructor() {
+  constructor(minFrequency = 1) {
     this.vocab = {};
     this.invVocab = {};
+    this.tokenFreq = {};
     this.specialTokens = {
       "[PAD]": 0,
       "[UNK]": 1,
@@ -20,6 +21,7 @@ class SimpleTokenizer {
 
     this.nextId = Object.keys(this.specialTokens).length;
     this.conversationLog = [];
+    this.minFrequency = minFrequency;
   }
 
   initialize({
@@ -110,20 +112,26 @@ class SimpleTokenizer {
     }
   }
 
-  addToken(token) {
+ addToken(token) {
+    this.tokenFreq[token] = (this.tokenFreq[token] || 0) + 1;
+
     if (!(token in this.vocab)) {
-      this.vocab[token] = this.nextId;
-      this.invVocab[this.nextId] = token;
-      this.nextId++;
+      if (this.tokenFreq[token] >= this.minFrequency) {
+        this.vocab[token] = this.nextId;
+        this.invVocab[this.nextId] = token;
+        this.nextId++;
+      }
     }
-    return this.vocab[token];
+    return this.vocab[token] !== undefined ? this.vocab[token] : this.vocab["[UNK]"];
   }
 
   train(texts) {
     for (let text of texts) {
       let tokens = this.tokenize(text);
       for (let token of tokens) {
-        if (!(token in this.vocab)) {
+        this.tokenFreq[token] = (this.tokenFreq[token] || 0) + 1;
+
+        if (!(token in this.vocab) && this.tokenFreq[token] >= this.minFrequency) {
           this.vocab[token] = this.nextId;
           this.invVocab[this.nextId] = token;
           this.nextId++;
