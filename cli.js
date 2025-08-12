@@ -1,17 +1,28 @@
 const fs = require('fs');
+const path = require('path');
 const readline = require('readline');
 const SimpleTokenizer = require('./tokenizer');
 
 const tokenizer = new SimpleTokenizer();
 
-const rawData = fs.readFileSync('sentences.json', 'utf8');
-const sentences = JSON.parse(rawData);
+const vocabPath = path.join(__dirname, 'vocab.json');
+const conversationPath = path.join(__dirname, 'conversation.json');
 
-const loadNewConversation = fs.readFileSync('conversation.json', 'utf8');
-const newSentences = JSON.parse(loadNewConversation);
+if (fs.existsSync(vocabPath)) {
+  tokenizer.loadVocab(vocabPath);
+  console.log('Loaded existing vocabulary.');
+} else {
+  console.log('No saved vocabulary found. Starting fresh.');
+}
 
-tokenizer.train(sentences);
-tokenizer.train(newSentences);
+let conversations = [];
+if (fs.existsSync(conversationPath)) {
+  try {
+    conversations = JSON.parse(fs.readFileSync(conversationPath, 'utf8'));
+  } catch {
+    conversations = [];
+  }
+}
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -26,6 +37,8 @@ rl.on('line', (line) => {
   line = line.trim();
 
   if (line.toLowerCase() === 'exit') {
+    tokenizer.saveVocab(vocabPath);
+    fs.writeFileSync(conversationPath, JSON.stringify(conversations, null, 2), 'utf8');
     rl.close();
     return;
   }
@@ -36,7 +49,10 @@ rl.on('line', (line) => {
   if (command === 'encode:') {
     const encoded = tokenizer.encode(arg);
     console.log('Encoded:', encoded);
-  } else if (command === 'decode:') {
+
+    conversations.push(arg);
+  } 
+  else if (command === 'decode:') {
     try {
       const ids = arg.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
       const decoded = tokenizer.decode(ids);
@@ -44,8 +60,9 @@ rl.on('line', (line) => {
     } catch (err) {
       console.log('Error decoding:', err.message);
     }
-  } else {
-    console.log('Unknown command. Use "encode <text>" or "decode <ids comma separated>" or "exit"');
+  } 
+  else {
+    console.log('Unknown command. Use "encode: <text>" or "decode: <ids comma separated>" or "exit"');
   }
 
   rl.prompt();

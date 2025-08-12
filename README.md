@@ -12,14 +12,17 @@ This project is a simple tokenizer built in Node.js that:
 
 ## File Structure
 
-Tokenizer/  
-├── README.md                 # This explanation file  
-├── tokenizer.js                    # Tokenizer class implementation  
-├── index.js                	       	# Example script demonstrating usage  
-├── examples/                 
-│   ├── encode.example.js     # Example script demonstrating encoding text  
-│   └── decode.example.js     # Example script demonstrating decoding text  
-└── sentences.json            # Sample sentences to build vocabulary from  
+Tokenizer/
+├── README.md                 # This explanation file
+├── tokenizer.js               # Tokenizer class implementation
+├── train.js                   # Script to build/update vocabulary from data files
+├── index.js                   # CLI for encoding/decoding text
+├── examples/
+│   ├── encode.example.js      # Example: encoding text
+│   └── decode.example.js      # Example: decoding token IDs
+├── sentences.json             # Sample base sentences for vocabulary
+├── conversation.json          # New words collected from conversations
+└── vocab.json                 # Saved vocabulary (created automatically after training)
  
 ---
 
@@ -78,17 +81,51 @@ You can update this file to include more or different sentences to expand the vo
 
 ---
 
-### `example.js`
+### `index.js`
 
 A script demonstrating how to:
 
+- Load existing vocab from `vocab.json`
 - Load sentences from `sentences.json`
+- Load conversations from `conversation.json`
 - Build the tokenizer vocabulary
-- Encode a text sentence into token IDs
-- Decode a list of token IDs back into readable text
+- Save the vocab
 - Print the vocabulary learned
 
 To run this script:
 
 ```bash
-node example.js
+node index.js
+```
+
+---
+
+### `cli.js`
+
+A cli script demonstrating how to:
+
+- Load existing vocab from `vocab.json`
+- Load conversations from `conversation.json`
+- Encode text using command "encode:"
+- Decode text using command "decode:"
+
+To run this script:
+
+```bash
+node train.js
+
+Tokenizer CLI ready.
+Enter "encode: <text>" or "decode: <ids comma separated>" or "exit":
+encode: yup man
+Encoded: [ 203, 204 ]
+decode: yup man
+
+
+#When new word given that is not in vocab
+Enter "encode: <text>" or "decode: <ids comma separated>" or "exit":
+> encode: new thing
+Detected new word - [new]
+Saving to vocab
+Detected new word - [thing]
+Saving to vocab
+Encoded: [ 206, 207 ]
