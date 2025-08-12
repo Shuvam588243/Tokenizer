@@ -2,12 +2,15 @@ const path = require('path');
 const fs = require('fs');
 const SimpleTokenizer = require('../tokenizer');
 
-const filePath = path.join(__dirname, '..', 'sentences.json');
-const rawData = fs.readFileSync(filePath, 'utf8');
-const sentences = JSON.parse(rawData);
+const vocabPath = path.join(__dirname, 'vocab.json');
 
 const tokenizer = new SimpleTokenizer();
-tokenizer.train(sentences);
+if (fs.existsSync(vocabPath)) {
+  tokenizer.loadVocab(vocabPath);
+  console.log('Loaded existing vocabulary.');
+} else {
+  console.log('No saved vocabulary found. Starting fresh.');
+}
 
 const text = "Do you know me?";
 const encoded = tokenizer.encode(text);

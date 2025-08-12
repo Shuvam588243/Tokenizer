@@ -12,7 +12,12 @@ if (fs.existsSync(vocabPath)) {
   tokenizer.loadVocab(vocabPath);
   console.log('Loaded existing vocabulary.');
 } else {
-  console.log('No saved vocabulary found. Starting fresh.');
+  console.log('Vocabulary not found, initializing new vocabulary.');
+  tokenizer.initialize({
+    vocabPath: path.join(__dirname, 'vocab.json'),
+    conversationPath: path.join(__dirname, 'conversation.json'),
+    sentencesPath: path.join(__dirname, 'sentences.json'),
+  });
 }
 
 let conversations = [];
