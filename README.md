@@ -7,24 +7,6 @@ This project is a simple tokenizer built in Node.js that:
 - Converts token IDs back to text (decode)
 - Handles special tokens like `[PAD]`, `[UNK]`, `[CLS]`, and `[SEP]`
 
----
-
-
-## File Structure
-
-Tokenizer/
-├── README.md                 # This explanation file
-├── tokenizer.js               # Tokenizer class implementation
-├── train.js                   # Script to build/update vocabulary from data files
-├── index.js                   # CLI for encoding/decoding text
-├── examples/
-│   ├── encode.example.js      # Example: encoding text
-│   └── decode.example.js      # Example: decoding token IDs
-├── sentences.json             # Sample base sentences for vocabulary
-├── conversation.json          # New words collected from conversations
-└── vocab.json                 # Saved vocabulary (created automatically after training)
- 
----
 
 ## File Details
 
@@ -78,6 +60,12 @@ If you want, I can help you extend your tokenizer to automatically insert these 
 A JSON file containing an array of example sentences. The tokenizer learns its vocabulary from these sentences.
 
 You can update this file to include more or different sentences to expand the vocabulary.
+
+---
+
+### `vocab.json`
+
+A JSON file containing trained vocabulary generated from sentences as well as conversation made with the cli. It is getting constantly updated if any new words is detected and its frequency is more then the minimum frequency threshold
 
 ---
 
