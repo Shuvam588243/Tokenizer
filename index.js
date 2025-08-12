@@ -1,25 +1,31 @@
 const fs = require('fs');
+const path = require('path');
 const SimpleTokenizer = require('./tokenizer');
 
 const tokenizer = new SimpleTokenizer();
 
-const rawData = fs.readFileSync('sentences.json', 'utf8');
-const sentences = JSON.parse(rawData);
+const vocabPath = path.join(__dirname, 'vocab.json');
+const conversationPath = path.join(__dirname, 'conversation.json');
+const sentencesPath = path.join(__dirname, 'sentences.json');
 
-const loadNewConversation = fs.readFileSync('conversation.json', 'utf8');
-const newSentences = JSON.parse(loadNewConversation);
+if (fs.existsSync(vocabPath)) {
+  tokenizer.loadVocab(vocabPath);
+  console.log('Loaded existing vocabulary.');
+} else {
+  console.log('No saved vocabulary found. Starting fresh.');
+}
 
-tokenizer.train(sentences);
-tokenizer.train(newSentences);
+if (fs.existsSync(sentencesPath)) {
+  const baseData = JSON.parse(fs.readFileSync(sentencesPath, 'utf8'));
+  tokenizer.train(baseData);
+}
 
-// examples
-// microservices architecture is amazing
+if (fs.existsSync(conversationPath)) {
+  const convData = JSON.parse(fs.readFileSync(conversationPath, 'utf8'));
+  tokenizer.train(convData);
+}
 
+console.log("Vocabulary:", tokenizer.vocab);
 
-const text = "is Microservice a better choice then monolithic?";
-const encoded = tokenizer.encode(text);
-console.log("Encoded:", encoded);
-
-const tokensToDecode = encoded;
-const decoded = tokenizer.decode(tokensToDecode);
-console.log("Decoded:", decoded);
+tokenizer.saveVocab(vocabPath);
+console.log(`Vocabulary saved to ${vocabPath}`);

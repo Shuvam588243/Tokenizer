@@ -19,7 +19,67 @@ class SimpleTokenizer {
     }
 
     this.nextId = Object.keys(this.specialTokens).length;
+    this.conversationLog = [];
   }
+
+
+  loadVocab(filePath = path.join(__dirname, 'vocab.json')) {
+		if (fs.existsSync(filePath)) {
+			const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+			this.vocab = data.vocab;
+			this.invVocab = data.invVocab;
+			this.nextId = data.nextId;
+		}
+	}
+
+  saveVocab(filePath = path.join(__dirname, 'vocab.json')) {
+		fs.writeFileSync(filePath, JSON.stringify({
+			vocab: this.vocab,
+			invVocab: this.invVocab,
+			nextId: this.nextId
+		}, null, 2), 'utf8');
+	}
+
+
+  exportVocab(filePath) {
+		fs.writeFileSync(filePath, JSON.stringify(this.vocab, null, 2), 'utf8');
+	}
+
+
+  importVocab(filePath) {
+		const vocab = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+		this.vocab = vocab;
+		this.invVocab = Object.fromEntries(Object.entries(vocab).map(([k, v]) => [v, k]));
+		this.nextId = Math.max(...Object.values(vocab)) + 1;
+	}
+
+
+  flushConversations(filePath = path.join(__dirname, 'conversation.json')) {
+		if (this.conversationLog.length > 0) {
+			let existing = [];
+			if (fs.existsSync(filePath)) {
+				try {
+					existing = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+				} catch {
+					existing = [];
+				}
+			}
+			existing.push(...this.conversationLog);
+			fs.writeFileSync(filePath, JSON.stringify(existing, null, 2), 'utf8');
+			this.conversationLog = [];
+		}
+	}
+
+
+  addToken(token) {
+		if (!(token in this.vocab)) {
+			this.vocab[token] = this.nextId;
+			this.invVocab[this.nextId] = token;
+			this.nextId++;
+		}
+		return this.vocab[token];
+	}
+
 
   train(texts) {
     for (let text of texts) {
@@ -54,26 +114,16 @@ class SimpleTokenizer {
       } else {
         console.log(`Detected new word - [${token}]`);
         newWordFound=true;
-        this.vocab[token] = this.nextId;
-        this.invVocab[this.nextId] = token;
-        this.nextId++;
-        ids.push(this.vocab[token])
+        newWordFound = true;
+				ids.push(this.addToken(token));
+        console.log("Saving to vocab");
+        this.saveVocab();
       }
     }
 
-    if(newWordFound){
-      const filePath = path.join(__dirname, 'conversation.json');
-        let existing = [];
-        if (fs.existsSync(filePath)) {
-            try {
-                existing = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-            } catch {
-                existing = [];
-            }
-        }
-        existing.push(text);
-        fs.writeFileSync(filePath, JSON.stringify(existing, null, 2), 'utf8');
-    }
+    if (newWordFound) {
+			this.conversationLog.push(text);
+		}
     return ids;
   }
 
