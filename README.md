@@ -92,3 +92,31 @@ To run this script:
 
 ```bash
 node example.js
+```
+
+## CLI Tool
+
+Run the CLI tool from your terminal:
+
+```bash
+node cli.js
+```
+
+```
+Enter "encode <text>" or "decode <ids comma separated>" or "exit":
+>
+```
+Enter the text you want to encode
+```
+Enter "encode <text>" or "decode <ids comma separated>" or "exit":
+>encode: Architecture
+Encoded: [ 26 ]
+```
+
+
+Enter the text you want to decode
+```
+Enter "encode <text>" or "decode <ids comma separated>" or "exit":
+>decode: 26
+Decoded: microservice
+```
